@@ -35,7 +35,7 @@ const styles = {
   },
   tabs: {
     mt: 2,
-    ml: 12,
+    ml: 6,
   },
   datePickerContainer: {
     display: "flex",
