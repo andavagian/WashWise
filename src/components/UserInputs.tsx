@@ -26,9 +26,6 @@ const styles = {
     border: "1px solid black",
     borderRadius: 2,
   },
-  country: {
-    // width: "100%",
-  },
   city: {
     width: "100%",
     mt: 2
@@ -106,7 +103,6 @@ function UserInputs({response}: UserInputsProps) {
           value={country}
           label="Choose a Country"
           onChange={handleCountryChange}
-          sx={styles.country}
         >
           {COUNTRIES.map((country) => (
             <MenuItem key={country} value={country}>
