@@ -61,8 +61,6 @@ function DisplayWeatherData() {
       return 'No data available.';
     }
 
-    console.log(weatherData.daily);
-
     const { time, temperature_2m_max, precipitation_sum, windspeed_10m_max } = weatherData.daily;
 
     const dateRange = formattedEndDate === formattedStartDate ? [formattedStartDate] : time;
