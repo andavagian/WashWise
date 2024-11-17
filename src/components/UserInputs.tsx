@@ -5,13 +5,12 @@ import Select, {SelectChangeEvent} from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import Typography from "@mui/material/Typography";
 import InputLabel from "@mui/material/InputLabel";
-import {COUNTRIES, COUNTRY_CITIES} from "../constants";
-import {useUserInput} from "./ContextProvider";
 import {Checkbox, Divider, Tab, Tabs} from "@mui/material";
 import {DatePicker} from '@mui/x-date-pickers/DatePicker';
 import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
 import {AdapterDayjs} from '@mui/x-date-pickers/AdapterDayjs';
-import dayjs from "dayjs";
+import {COUNTRIES, COUNTRY_CITIES} from "../constants";
+import {useUserInput} from "./ContextProvider";
 
 const styles = {
   root: {
@@ -71,14 +70,6 @@ function UserInputs({response}: UserInputsProps) {
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setYesOrNoValue(newValue);
-    // if (newValue === 0) {
-    //   setStartDate(null)
-    //   setEndDate(null)
-    // }
-    // if (newValue === 1) {
-    //   setStartDate(dayjs());
-    //   setEndDate(dayjs().add(7, 'days'));
-    // }
   };
 
   const handleCheckboxChange = () => {
