@@ -4,13 +4,13 @@ import { useUserInput } from './ContextProvider';
 import dayjs from 'dayjs';
 import { CITY_COORDINATES } from '../constants';
 import Typography from "@mui/material/Typography";
-import CircularProgress from "@mui/material/CircularProgress"; // Import CircularProgress for loading indicator
+import CircularProgress from "@mui/material/CircularProgress";
 
 function DisplayWeatherData() {
   const { city, startDate, endDate, yesOrNoValue } = useUserInput();
   const [weatherData, setWeatherData] = useState<any>(null);
   const [bestDayToWash, setBestDayToWash] = useState<string>('');
-  const [loading, setLoading] = useState<boolean>(false); // Add loading state
+  const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
     async function fetchWeatherData() {
@@ -27,7 +27,7 @@ function DisplayWeatherData() {
         'YYYY-MM-DD'
       )}&end_date=${dayjs(end).format('YYYY-MM-DD')}&daily=temperature_2m_max,precipitation_sum,windspeed_10m_max&timezone=auto`;
 
-      setLoading(true); // Start loading
+      setLoading(true);
 
       try {
         const response = await fetch(url);
@@ -37,7 +37,7 @@ function DisplayWeatherData() {
       } catch (error) {
         console.error(error);
       } finally {
-        setLoading(false); // End loading
+        setLoading(false);
       }
     }
 
