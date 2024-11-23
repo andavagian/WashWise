@@ -121,7 +121,7 @@ function DisplayWeatherData({city, startDate, endDate, yesOrNoValue}: WeatherDat
         <CircularProgress size="16px"/>
       ) : weatherData ? (
         <Typography variant="body1" mt={2}>{bestDayToWash}</Typography>
-      ) : null}
+      ) : !city && !yesOrNoValue && <Typography variant="body2" mt={2}>Please choose a city.</Typography>}
     </Box>
   );
 }
