@@ -1,31 +1,40 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import Box from '@mui/material/Box';
-import { useUserInput } from './ContextProvider';
-import dayjs from 'dayjs';
-import { CITY_COORDINATES } from '../constants';
 import Typography from "@mui/material/Typography";
 import CircularProgress from "@mui/material/CircularProgress";
+import dayjs from 'dayjs';
+import {CITY_COORDINATES} from '../constants';
 
-function DisplayWeatherData() {
-  const { city, startDate, endDate, yesOrNoValue } = useUserInput();
+interface WeatherDataProps {
+  city: string;
+  startDate?: dayjs.Dayjs | null;
+  endDate?: dayjs.Dayjs | null;
+  yesOrNoValue?: boolean;
+}
+
+function DisplayWeatherData({city, startDate, endDate, yesOrNoValue}: WeatherDataProps) {
   const [weatherData, setWeatherData] = useState<any>(null);
   const [bestDayToWash, setBestDayToWash] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
     async function fetchWeatherData() {
-      const { latitude, longitude } = CITY_COORDINATES[city] || {};
+      const {latitude, longitude} = CITY_COORDINATES[city] || {};
+      const defaultStartDate = dayjs().startOf('day');
+      const defaultEndDate = defaultStartDate.add(7, 'day');
 
-      if (!latitude || !longitude || !startDate) {
-        console.error('Invalid city or start date.');
+      const resolvedStartDate = yesOrNoValue ? startDate : defaultStartDate;
+      const resolvedEndDate = yesOrNoValue ? endDate || resolvedStartDate : defaultEndDate;
+
+      if (!latitude || !longitude || !resolvedStartDate) {
         return;
       }
 
-      const end = endDate || startDate;
-
-      const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&start_date=${dayjs(startDate).format(
+      const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&start_date=${dayjs(resolvedStartDate).format(
         'YYYY-MM-DD'
-      )}&end_date=${dayjs(end).format('YYYY-MM-DD')}&daily=temperature_2m_max,precipitation_sum,windspeed_10m_max&timezone=auto`;
+      )}&end_date=${dayjs(resolvedEndDate).format(
+        'YYYY-MM-DD'
+      )}&daily=temperature_2m_max,precipitation_sum,windspeed_10m_max&timezone=auto`;
 
       setLoading(true);
 
@@ -41,17 +50,19 @@ function DisplayWeatherData() {
       }
     }
 
-    if (city && startDate) {
+    if (city) {
       fetchWeatherData();
     }
-  }, [city, startDate, endDate]);
+  }, [city, startDate, endDate, yesOrNoValue]);
 
   useEffect(() => {
     if (weatherData) {
-      const bestDay = bestDayToWashCar(weatherData, startDate!, endDate!);
+      const resolvedStartDate = yesOrNoValue ? startDate! : dayjs().startOf('day');
+      const resolvedEndDate = yesOrNoValue ? endDate! : resolvedStartDate.add(7, 'day');
+      const bestDay = bestDayToWashCar(weatherData, resolvedStartDate, resolvedEndDate);
       setBestDayToWash(bestDay);
     }
-  }, [weatherData, startDate, endDate]);
+  }, [weatherData, startDate, endDate, yesOrNoValue]);
 
   function bestDayToWashCar(weatherData: any, startDate: string | dayjs.Dayjs, endDate: string | dayjs.Dayjs) {
     const formattedStartDate = dayjs(startDate).format('YYYY-MM-DD');
@@ -61,7 +72,7 @@ function DisplayWeatherData() {
       return 'No data available.';
     }
 
-    const { time, temperature_2m_max, precipitation_sum, windspeed_10m_max } = weatherData.daily;
+    const { time = [], temperature_2m_max = [], precipitation_sum = [], windspeed_10m_max = [] } = weatherData.daily;
 
     const dateRange = formattedEndDate === formattedStartDate ? [formattedStartDate] : time;
 
@@ -77,23 +88,31 @@ function DisplayWeatherData() {
       if (rain === 0 && tempMax >= 0 && tempMax <= 50 && windSpeed < 20) {
         if (tempMax > bestTemp) {
           bestTemp = tempMax;
-          bestDay = { date, tempMax };
+          bestDay = {date, tempMax};
         }
       }
     }
 
     if (bestDay) {
-      if (formattedStartDate === formattedEndDate) {
-        return `${bestDay.date} is a great day to wash the car! The temperature is ${bestDay.tempMax}°C with no rain and low wind.`;
+      if (yesOrNoValue) {
+        if (formattedStartDate === formattedEndDate) {
+          return `${bestDay.date} is a great day to wash the car! The temperature is ${bestDay.tempMax}°C with no rain and low wind.`;
+        }
+        return `The best day to wash the car is ${bestDay.date} with a max temperature of ${bestDay.tempMax}°C, no rain, and low wind.`;
       }
-      return `The best day to wash the car is ${bestDay.date} with a max temperature of ${bestDay.tempMax}°C, no rain, and low wind.`;
+      else {
+        return `In the upcoming week, the best day to wash your car is ${bestDay.date} with a max temperature of ${bestDay.tempMax}°C, no rain, and low wind.`;
+      }
     }
 
-    if (formattedStartDate === formattedEndDate) {
-      return `No ideal conditions for washing the car on ${formattedStartDate}.`;
+    if (yesOrNoValue) {
+      if (formattedStartDate === formattedEndDate) {
+        return `No ideal conditions for washing the car on ${formattedStartDate}.`;
+      }
+      return 'No ideal days for washing the car within the selected date range.';
+    } else {
+      return 'No ideal days for washing the car in the upcoming week.';
     }
-
-    return 'No ideal days for washing the car within the selected date range.';
   }
 
   return (
@@ -101,7 +120,7 @@ function DisplayWeatherData() {
       {loading ? (
         <CircularProgress size="16px"/>
       ) : weatherData ? (
-        <Typography variant="body1">{bestDayToWash}</Typography>
+        <Typography variant="body1" mt={2}>{bestDayToWash}</Typography>
       ) : null}
     </Box>
   );

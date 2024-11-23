@@ -5,7 +5,6 @@ import theme from "./theming";
 import Header from "./components/Header";
 import UserInputs from "./components/UserInputs";
 import {UserInputProvider} from "./components/ContextProvider";
-import DisplayWeatherData from "./components/WeatherDataApi";
 
 function App() {
 
@@ -14,7 +13,7 @@ function App() {
       <UserInputProvider>
         <Container>
           <Header/>
-          <UserInputs response={<DisplayWeatherData />} />
+          <UserInputs />
         </Container>
       </UserInputProvider>
     </ThemeProvider>

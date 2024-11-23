@@ -5,11 +5,11 @@ interface UserInputContextType {
   city: string;
   startDate?: Dayjs | null;
   endDate?: Dayjs | null;
-  yesOrNoValue?: number;
+  yesOrNoValue?: boolean;
   setCity: (city: string) => void;
   setStartDate: (date: Dayjs | null) => void;
   setEndDate: (date: Dayjs | null) => void;
-  setYesOrNoValue: (value: number) => void;
+  setYesOrNoValue: (value: boolean) => void;
 }
 
 const UserInputContext = createContext<UserInputContextType | undefined>(undefined);
@@ -18,7 +18,7 @@ function UserInputProvider({children}: { children: ReactNode }){
   const [city, setCity] = useState<string>("");
   const [startDate, setStartDate] = useState<Dayjs | null>(null);
   const [endDate, setEndDate] = useState<Dayjs | null>(null);
-  const [yesOrNoValue, setYesOrNoValue] = React.useState(0);
+  const [yesOrNoValue, setYesOrNoValue] = React.useState(true);
 
   return (
     <UserInputContext.Provider value={{city, startDate, endDate, yesOrNoValue, setCity, setStartDate, setEndDate, setYesOrNoValue}}>

@@ -5,12 +5,11 @@ import Select, {SelectChangeEvent} from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import Typography from "@mui/material/Typography";
 import InputLabel from "@mui/material/InputLabel";
-import {Checkbox, Divider, Tab, Tabs} from "@mui/material";
-import {DatePicker} from '@mui/x-date-pickers/DatePicker';
-import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
-import {AdapterDayjs} from '@mui/x-date-pickers/AdapterDayjs';
+import {Divider, Tab, Tabs} from "@mui/material";
 import {COUNTRIES, COUNTRY_CITIES} from "../constants";
-import {useUserInput} from "./ContextProvider";
+import {UserInputProvider, useUserInput} from "./ContextProvider";
+import RangeSpecifiedSuggestion from "./RangeSpecifiedSuggestion";
+import DisplayWeatherData from "./WeatherDataApi";
 
 const styles = {
   root: {
@@ -20,7 +19,7 @@ const styles = {
   },
   inputBox: {
     width: "70%",
-    height: 500,
+    minHeight: 500,
     p: 2,
     border: "1px solid black",
     borderRadius: 2,
@@ -33,28 +32,12 @@ const styles = {
     mt: 2,
     ml: 6,
   },
-  datePickerContainer: {
-    display: "flex",
-    alignItems: "center",
-    gap: 3
-  },
-  rangeOfDays: {
-    display: "flex",
-    alignItems: "center",
-    gap: 1,
-    marginY: 1,
-  }
 }
 
-interface UserInputsProps {
-  response: JSX.Element;
-}
-
-function UserInputs({response}: UserInputsProps) {
+function UserInputs() {
   const [country, setCountry] = React.useState("");
   const [cities, setCities] = React.useState<string[]>([]);
-  const {city, setCity, startDate, setStartDate, endDate, setEndDate, yesOrNoValue, setYesOrNoValue} = useUserInput();
-  const [isRangeSelected, setIsRangeSelected] = React.useState(false);
+  const {city, setCity, yesOrNoValue, setYesOrNoValue} = useUserInput();
 
   const handleCountryChange = (event: SelectChangeEvent) => {
     const selectedCountry = event.target.value;
@@ -69,17 +52,7 @@ function UserInputs({response}: UserInputsProps) {
   };
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-    setYesOrNoValue(newValue);
-  };
-
-  const handleCheckboxChange = () => {
-    setIsRangeSelected((prev) => {
-      const newValue = !prev;
-      if (!newValue) {
-        setEndDate(null);
-      }
-      return newValue;
-    });
+    setYesOrNoValue(!newValue);
   };
 
   return <Box sx={styles.root}>
@@ -122,43 +95,21 @@ function UserInputs({response}: UserInputsProps) {
       <Typography variant="body1" marginTop={2} marginBottom={0.5}>
         Do you have a specific day in mind for your car wash?
       </Typography>
-      <Tabs value={yesOrNoValue} onChange={handleTabChange} aria-label="yes/no tabs" sx={styles.tabs}>
+      <Tabs value={yesOrNoValue ? 0 : 1} onChange={handleTabChange} aria-label="yes/no tabs" sx={styles.tabs}>
         <Tab label="Yes" disableRipple/>
         <Tab label="No" disableRipple/>
       </Tabs>
-      {yesOrNoValue === 0 && (
-        <Box>
-          <Box sx={styles.rangeOfDays}>
-            <Checkbox disableRipple checked={isRangeSelected} onChange={handleCheckboxChange}/>
-            <Typography variant="body2" fontWeight="bold">Select a range of days</Typography>
-          </Box>
-          <Box sx={styles.datePickerContainer}>
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DatePicker
-                label={`Choose a ${isRangeSelected ? 'Start Date' : 'Date'}`}
-                value={startDate}
-                onChange={(newValue) => setStartDate(newValue)}
+      {yesOrNoValue &&
+          <UserInputProvider>
+              <RangeSpecifiedSuggestion
+                  city={city}
+                  yesOrNoValue={yesOrNoValue}
               />
-            </LocalizationProvider>
-            {isRangeSelected && (
-              <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DatePicker
-                  label="Choose an End Date"
-                  value={endDate}
-                  onChange={(newValue) => setEndDate(newValue)}
-                  minDate={startDate ? startDate : undefined}
-                />
-              </LocalizationProvider>
-            )}
-          </Box>
-        </Box>
-      )}
-      {yesOrNoValue === 0 && <Box marginTop={2}>
-        {response}
-      </Box>}
-      {yesOrNoValue === 1 && <Typography variant="body2" marginTop={10}>
-          Coming soon.
-      </Typography>}
+          </UserInputProvider>
+      }
+      {!yesOrNoValue && <UserInputProvider>
+          <DisplayWeatherData city={city} yesOrNoValue={yesOrNoValue} />
+      </UserInputProvider>}
     </Box>
   </Box>
 }
